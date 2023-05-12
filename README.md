@@ -14,11 +14,10 @@
     Run the command - `pip install -r requirements.txt --no-deps`
    ### For Windows
    1 . Comment `uvloop` module in `requirements.txt` 
+   2 . Change 'psycopg2-binary' to 'psycopg2'
+   3 . Run the command - `pip install -r requirements.txt --no-deps`
    
-   2 . Run the command - `pip install -r requirements.txt --no-deps`
-
-## Start Server
-1. Create `.env` file inside cloned project and type inside it:
+8. Create `.env` file inside cloned project and type inside it:
 
 ```
 # SMTP Settings
@@ -55,13 +54,12 @@
  ACCESS_TOKEN_EXPIRE_MINUTES=
 ```
 
-You must fill the variables given for you by Team-Lead
-## 2. Start the app
+## Start the app
 - Now you can start the project `uvicorn main:app` and navigate to `localhost:8000`
 - The flag `--reload` allows you to automatically restart the server after the applied changes in the code
 - The flag `--port` allows you to change port.
 
-## 2.1 Run migrations
+## Migrations
 ### WARNING! - Do not forget to import all models to app/models/__init__.py
 ### Create a migrations file
 - alembic revision --autogenerate -m "name_of_your_migration"
@@ -73,9 +71,9 @@ You must fill the variables given for you by Team-Lead
 - `{domain}/api/v1/docs/`
 
 
-# 3. Run Docker Container
+# Run Docker Container
 
-# 3.1 Setup for Linux
+## Setup for Linux
 Install Docker, docker-compose:
 ```
 sudo apt update
@@ -93,14 +91,14 @@ sudo apt-get install docker-compose
 sudo systemctl status docker
 ```
 
-# 3.2 Setup for Windows
+## Setup for Windows
 Update WSL and install Docker:
 ```
 https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
 https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe
 ```
 
-## 3.3 Run Docker containers
+## Run Docker containers
 - Backend runs on port 5000 
 
 ```
