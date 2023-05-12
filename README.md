@@ -62,6 +62,7 @@ You must fill the variables given for you by Team-Lead
 - The flag `--port` allows you to change port.
 
 ## 2.1 Run migrations
+### WARNING! - Do not forget to import all models to app/models/__init__.py
 ### Create a migrations file
 - alembic revision --autogenerate -m "name_of_your_migration"
 ### Run last migrations
