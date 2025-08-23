@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sqladmin import Admin
 
-from config.conf import settings
-from config.database import engine
+from app.config.config import settings
+# from app.config.database import engine
 
 from app.endpoints.routers import api_router
 # from app.endpoints import admins_models

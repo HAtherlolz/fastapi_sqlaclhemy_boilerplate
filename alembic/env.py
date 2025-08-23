@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from config.conf import settings
+from app.config.config import settings
 from app.models.base import Base
 
 
@@ -39,7 +39,7 @@ def run_migrations_offline() -> None:
     Calls to context.execute() here emit the given string to the
     script output.
     """
-    url = config.get_main_option(settings.DB_URL)
+    url = settings.DB_URL
 
     context.configure(
         url=url,
@@ -57,7 +57,6 @@ def run_migrations_online() -> None:
     In this scenario we need to create an Engine
     and associate a connection with the context.
     """
-    # print(settings.DB_URL_DICT_ALEMBIC)
     connectable = engine_from_config(
         settings.DB_URL_DICT_ALEMBIC,
         prefix="sqlalchemy.",

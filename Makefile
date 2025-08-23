@@ -1,13 +1,31 @@
-.PHONY:
+.PHONY: install run makemigrations migrate shell add add-dev update export-reqs
 .SILENT:
 
 MIGRATION_NAME ?= "New migration"
 
+install:
+	poetry install
+
 run:
-	uvicorn main:app --reload
+	poetry run uvicorn main:app --reload
 
 makemigrations:
-	alembic revision --autogenerate -m $(MIGRATION_NAME) - create migrations file
+	poetry run alembic revision --autogenerate -m $(MIGRATION_NAME)
 
 migrate:
-	alembic upgrade head
+	poetry run alembic upgrade head
+
+shell:
+	poetry shell
+
+add:
+	poetry add $(PACKAGE)
+
+add-dev:
+	poetry add --group dev $(PACKAGE)
+
+update:
+	poetry update
+
+export-reqs:
+	poetry export -f requirements.txt --output requirements.txt --without-hashes

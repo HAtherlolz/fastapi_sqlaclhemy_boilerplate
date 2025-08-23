@@ -1,12 +1,78 @@
 version: '3.8'
+
 services:
-  web:
-    container_name: card_checker
-    build: .
-    restart: always
-    env_file: .env
-    command: uvicorn main:app --host 0.0.0.0 --port 3000
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: unless-stopped
     volumes:
-     - .:/app
+      - ./app:/home/app/app
+      - ./main.py:/home/app/main.py
+      - ./alembic.ini:/home/app/alembic.ini
+      - ./alembic:/home/app/alembic
     ports:
-      -  3000:3000
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    command: >
+      sh -c "
+        poetry run uvicorn main:app --host 0.0.0.0 --port 8000
+      "
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-project}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: migrations
+    volumes:
+      - ./alembic:/home/app/alembic:ro
+      - ./alembic.ini:/home/app/alembic.ini:ro
+    env_file: .env
+    command: poetry run alembic upgrade head
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-cache
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+volumes:
+  postgres_data:
+
+# networks:
+#   default:
+#     name: fastapi-network
