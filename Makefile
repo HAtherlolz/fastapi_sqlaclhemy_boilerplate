@@ -1,4 +1,4 @@
-.PHONY: install run makemigrations migrate shell add add-dev update export-reqs
+.PHONY: install run makemigrations migrate shell add add-dev update export-reqs init-project build up down lock
 .SILENT:
 
 MIGRATION_NAME ?= "New migration"
@@ -27,5 +27,23 @@ add-dev:
 update:
 	poetry update
 
+lock:
+	poetry lock --no-update
+
 export-reqs:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+
+# Docker
+init-project:
+	docker-compose up --build
+
+build:
+	docker-compose build
+
+up:
+	docker-compose up
+
+down:
+	docker-compose down
+
