@@ -15,12 +15,16 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+      WATCHFILES_TIMEOUT: "500"
+      POETRY_VIRTUALENVS_IN_PROJECT: "true"
     depends_on:
       migrations:
         condition: service_completed_successfully
     command: >
       sh -c "
-        poetry run uvicorn main:app --host 0.0.0.0 --port 8000
+        poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload 
       "
 
   postgres:
@@ -47,32 +51,18 @@ services:
       dockerfile: Dockerfile
     container_name: migrations
     volumes:
-      - ./alembic:/home/app/alembic:ro
-      - ./alembic.ini:/home/app/alembic.ini:ro
+      - ./app:/home/app/app:ro 
+      - ./alembic:/home/app/alembic
+      - ./alembic.ini:/home/app/alembic.ini
     env_file: .env
     command: poetry run alembic upgrade head
     depends_on:
       postgres:
         condition: service_healthy
 
-  # Optional: Redis for caching (uncomment if needed)
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: redis-cache
-  #   restart: unless-stopped
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-
 volumes:
   postgres_data:
 
-# networks:
-#   default:
-#     name: fastapi-network
+
+# Downgrade migrations 
+# docker compose run --rm migrations sh -lc "alembic downgrade -1"

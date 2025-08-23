@@ -1,4 +1,4 @@
-.PHONY: install run makemigrations migrate shell add add-dev update export-reqs check black-check isort-check mypy-check black-format format isort-format init-project build up down lock
+.PHONY: install run makemigrations migrate shell add add-dev update export-reqs check black-check isort-check mypy-check black-format format isort-format autogen init-project build up down lock
 .SILENT:
 
 MIGRATION_NAME ?= "New migration"
@@ -57,6 +57,11 @@ isort-format:
 format:
 	poetry run black app tests
 	poetry run isort app tests
+
+
+# Migrations
+autogen:
+	docker compose run --rm migrations sh -lc "alembic revision --autogenerate -m '$(m)'"
 
 
 # Docker
