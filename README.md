@@ -92,6 +92,54 @@
 - `poetry update` - Update dependencies
 - `poetry export -f requirements.txt --output requirements.txt` - Export to requirements.txt
 
+## Code Quality Tools
+
+### Using Makefile
+```bash
+# Format code (black + isort)
+make format
+
+# Check formatting without changing files
+make format-check
+
+# Run flake8 linting
+make lint
+
+# Run mypy type checking
+make type-check
+
+# Run all checks
+make check
+
+# Auto-fix formatting issues
+make fix
+```
+
+### Using Poetry directly
+```bash
+# Format code
+poetry run black .
+poetry run isort .
+
+# Lint code
+poetry run flake8 .
+
+# Type checking
+poetry run mypy .
+```
+
+### Pre-commit hooks
+```bash
+# Install pre-commit hooks
+make pre-commit-install
+
+# Run pre-commit on all files
+make pre-commit-run
+
+# Update pre-commit hooks
+make pre-commit-update
+```
+
 # Run Docker Container
 
 ## Prerequisites

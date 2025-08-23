@@ -8,7 +8,6 @@ from app.config.config import DatabaseSettings, Settings
 from app.config.database import Database
 
 
-
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
 

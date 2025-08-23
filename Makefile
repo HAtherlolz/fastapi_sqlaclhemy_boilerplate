@@ -1,4 +1,4 @@
-.PHONY: install run makemigrations migrate shell add add-dev update export-reqs init-project build up down lock
+.PHONY: install run makemigrations migrate shell add add-dev update export-reqs check black-check isort-check mypy-check black-format format isort-format init-project build up down lock
 .SILENT:
 
 MIGRATION_NAME ?= "New migration"
@@ -32,6 +32,31 @@ lock:
 
 export-reqs:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+# Code formatting and linting
+check:
+	poetry run black app tests --check
+	poetry run isort app tests --check-only --diff
+	poetry run mypy --show-error-codes app tests
+
+black-check:
+	poetry run black app tests --check
+
+isort-check:
+	poetry run isort app tests --check-only --diff
+
+mypy-check:
+	poetry run mypy --show-error-codes app tests
+
+black-format:
+	poetry run black app tests
+
+isort-format:
+	poetry run isort app tests
+
+format:
+	poetry run black app tests
+	poetry run isort app tests
 
 
 # Docker

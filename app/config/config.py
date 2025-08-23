@@ -1,23 +1,23 @@
 import os
+from typing import Literal
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Literal
 
+from app.config.utils import ConnectionURLFactory
 
 load_dotenv()
 
 
 ENV_FILE_MODEL_CONFIG = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    env_file=".env",
+    env_file_encoding="utf-8",
+    extra="ignore",
+)
 
 
 class Settings(BaseSettings):
-
     model_config = ENV_FILE_MODEL_CONFIG
 
     # SMTP settings
@@ -50,7 +50,6 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_DATABASE: str
 
-    
     # Jwt
     SECRET_KEY: str | None = None
     ALGORITHM: str | None = None
@@ -84,7 +83,6 @@ class Settings(BaseSettings):
         }
 
 
-
 class DatabaseSettings(BaseSettings):
     model_config = ENV_FILE_MODEL_CONFIG | SettingsConfigDict(env_prefix="DB_")
     engine: Literal["postgres", "mssql"] = "postgres"
@@ -110,9 +108,7 @@ class DatabaseSettings(BaseSettings):
     @property
     def connection_url(self) -> str:
         """Generate connection URL using the appropriate factory method."""
-        auth_type = AuthType.PASSWORD if self.password_auth else AuthType.AZURE
-        url_creator = ConnectionURLFactory.get_url_creator(auth_type)
-        return url_creator(self)
+        return ConnectionURLFactory.create_password_auth_url(self)
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
