@@ -4,6 +4,7 @@ from alembic import context  # type: ignore[attr-defined]
 from sqlalchemy import engine_from_config, pool
 
 from src.config.config import settings
+from src.models import *  # noqa: F403,F401
 from src.models.base import Base
 
 

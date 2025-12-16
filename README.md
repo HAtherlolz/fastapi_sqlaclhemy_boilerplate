@@ -185,3 +185,9 @@ Bash
    - Open htmlcov/index.html in your browser to view the report.
 
 ---
+
+## Create migration
+1) Change the .env DB_HOST to localhost and run command bellow
+```commandline
+poetry run alembic revision --autogenerate -m "create users table"
+```
