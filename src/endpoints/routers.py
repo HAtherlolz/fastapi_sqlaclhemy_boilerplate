@@ -8,4 +8,3 @@ api_router = APIRouter(prefix="")
 
 # include routers from v1
 api_router.include_router(test_endpoint.router, prefix="/api/v1/test")
-

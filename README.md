@@ -30,35 +30,35 @@
 <a id="project-quick-start"></a>
 ## 🚀 Project quick start
 1. Clone the repo
-   
+
 Bash
 
     git clone {link of the project}
     cd {name of the project}
-   
+
 2. Set up environment
    - Copy .env.template to .env and fill in required variables.
    - Ask someone from development team about environment variables.
 3. Install Python dependencies for local development
-     
+
 Bash
 
      poetry install --with dev
-     
+
 
      Then install git hooks:
 
-     
+
 Bash
 
      poetry run pre-commit install
-     
+
 4. Run the application
-    
+
 Bash
 
     python entrypoint_api.py
-    
+
     OR\
     Setup run via PyCharm or VSCode with entrypoint_api.py as the main module and don't forget to set the .env file.
 
@@ -80,11 +80,11 @@ Bash
 2. Preparing Input Files
    - Put your document DOCX inside eval/documents/
 3. Running Local Evaluation
-    
+
 Bash
 
     python local_run_entrypoint.py
-    
+
 
 ---
 
@@ -153,35 +153,35 @@ Bash
 <a id="running-tests"></a>
 ## 🧪 Running Tests
 1. ▶️ Run all tests:
-   
+
 Bash
 
    poetry run pytest
-   
+
 2. 📊 Run tests with coverage report:
-   
+
 Bash
 
    poetry run pytest --cov=src
-   
+
 3. 🎯 Run specific test file:xw
-   
+
 Bash
 
    poetry run pytest tests/test_your_test_file.py
-   
+
 4. 🔎 Run specific test function:
-   
+
 Bash
 
    poetry run pytest tests/test_your_test_file.py::test_your_function
-   
+
 5. 📈 Generate coverage report in HTML:
-   
+
 Bash
 
    poetry run pytest --cov=src --cov-report=html
-   
+
    - Open htmlcov/index.html in your browser to view the report.
 
 ---

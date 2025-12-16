@@ -44,8 +44,8 @@ class LoggingConfig:
         "[%(trace_id)s] - [%(levelname)s] - %(message)s"
         if os.environ.get("LOG_MODE") == "dev"
         else '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "body": "%(message)s", '
-             '"log.logger": "%(name)s", "metadata": {"process": "%(process)d", "path": "%(pathname)s", '
-             '"trace_id": "%(trace_id)s"}}'
+        '"log.logger": "%(name)s", "metadata": {"process": "%(process)d", "path": "%(pathname)s", '
+        '"trace_id": "%(trace_id)s"}}'
     )
     DEFAULT_LOG_LEVEL: str = "INFO"
 

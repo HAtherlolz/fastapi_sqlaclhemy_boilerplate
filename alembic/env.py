@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from alembic import context
+from alembic import context  # type: ignore[attr-defined]
 from sqlalchemy import engine_from_config, pool
 
 from src.config.config import settings
@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = Base.metadata  # type: ignore[attr-defined]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
