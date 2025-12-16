@@ -1,56 +1,61 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
+# -------------------------
+# Environment
+# -------------------------
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV APP_HOME=/home/app
 
-WORKDIR $APP_HOME
+WORKDIR ${APP_HOME}
 
-# Install system dependencies for PostgreSQL and build tools
-RUN apk add --no-cache --virtual .build-deps \
-    postgresql-dev \
+# -------------------------
+# System dependencies
+# -------------------------
+RUN apk add --no-cache \
     gcc \
-    python3-dev \
+    g++ \
     musl-dev \
     libffi-dev \
-    && apk add --no-cache \
+    postgresql-dev \
     postgresql-client \
+    unixodbc \
+    unixodbc-dev \
     ca-certificates
 
-# Upgrade pip and install build tools
-RUN pip install --upgrade pip wheel setuptools
+# -------------------------
+# Python tooling
+# -------------------------
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install poetry==1.8.5
 
-RUN apk add --no-cache \
-    gcc g++ make musl-dev \
-    unixodbc unixodbc-dev
-
-# Copy Poetry files and install dependencies
-COPY pyproject.toml poetry.lock ./
-RUN pip install "poetry==1.8.5"
+# Disable venv inside container
 RUN poetry config virtualenvs.create false
+
+# -------------------------
+# Install dependencies
+# -------------------------
+COPY pyproject.toml poetry.lock ./
 RUN poetry install --only main --no-interaction --no-ansi
 
-# Copy project files
+# -------------------------
+# Copy application
+# -------------------------
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
-COPY app/ ./app/
-COPY main.py ./
+COPY src/ ./src/
 
-# Create entrypoint script
-RUN echo '#!/bin/sh\n\
-# Start the application\n\
-echo "Starting FastAPI application..."\n\
-exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload\n\
-' > entrypoint.sh
-
-RUN chmod +x entrypoint.sh
-
-# Create non-root user for security
-RUN adduser -u 5678 --system --disabled-password --gecos "" app && chown -R app $APP_HOME
+# -------------------------
+# Security: non-root user
+# -------------------------
+RUN adduser -D -u 5678 app \
+    && chown -R app:app ${APP_HOME}
 
 USER app
 
-# Expose port
+# -------------------------
+# Expose & Run
+# -------------------------
 EXPOSE 8000
 
-CMD ["sh", "entrypoint.sh"]
+CMD ["uvicorn", "src.main:create_api", "--factory", "--host", "0.0.0.0", "--port", "8000"]

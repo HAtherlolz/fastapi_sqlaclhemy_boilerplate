@@ -4,10 +4,9 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+from app.config.config import DatabaseSettings  # ← правильный импорт
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-from app.config.config import DatabaseSettings  # ← правильный импорт
 
 
 class Database:

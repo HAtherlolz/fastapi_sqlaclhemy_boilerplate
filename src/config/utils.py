@@ -3,16 +3,16 @@ from urllib.parse import unquote
 
 from sqlalchemy.engine import URL
 
-from app.constants import SQLALCHEMY_POSTGRES_DRIVER_NAME
+from src.constants import SQLALCHEMY_POSTGRES_DRIVER_NAME
+
 
 if TYPE_CHECKING:
     # With TYPE_CHECKING is often the best compromise when dealing with potential circular imports
     # while still maintaining proper type checking.
     # This approach imports DatabaseSettings only during type checking but not at runtime,
     # avoiding potential circular imports.
-    from sqlalchemy import Engine, event
 
-    from app.config.config import DatabaseSettings
+    from src.config.config import DatabaseSettings
 
 
 class ConnectionURLFactory:

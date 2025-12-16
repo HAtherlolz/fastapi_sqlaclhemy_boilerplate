@@ -1,68 +1,41 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: app
     restart: unless-stopped
-    volumes:
-      - ./app:/home/app/app
-      - ./main.py:/home/app/main.py
-      - ./alembic.ini:/home/app/alembic.ini
-      - ./alembic:/home/app/alembic
     ports:
       - "8000:8000"
     env_file: .env
-    environment:
-      WATCHFILES_FORCE_POLLING: "true"
-      WATCHFILES_TIMEOUT: "500"
-      POETRY_VIRTUALENVS_IN_PROJECT: "true"
     depends_on:
-      migrations:
-        condition: service_completed_successfully
-    command: >
-      sh -c "
-        poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload 
-      "
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:16-alpine
     container_name: postgres-db
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: .env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-project}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
 
   migrations:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: migrations
-    volumes:
-      - ./app:/home/app/app:ro 
-      - ./alembic:/home/app/alembic
-      - ./alembic.ini:/home/app/alembic.ini
     env_file: .env
-    command: poetry run alembic upgrade head
     depends_on:
       postgres:
         condition: service_healthy
+    command: alembic upgrade head
+    restart: "no"
 
 volumes:
   postgres_data:
-
-
-# Downgrade migrations 
-# docker compose run --rm migrations sh -lc "alembic downgrade -1"

@@ -2,10 +2,11 @@ import os
 from typing import Literal
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, computed_field
+from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.config.utils import ConnectionURLFactory
+from src.config.utils import ConnectionURLFactory
+
 
 load_dotenv()
 
@@ -77,8 +78,7 @@ class Settings(BaseSettings):
     def DB_URL_DICT_ALEMBIC(self) -> dict[str, str]:
         return {
             "sqlalchemy.url": (
-                f"postgresql://{self.DB_USERNAME}:{self.DB_PASSWORD}"
-                f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
+                f"postgresql://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
             )
         }
 

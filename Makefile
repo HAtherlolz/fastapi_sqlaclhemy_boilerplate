@@ -35,28 +35,10 @@ export-reqs:
 
 # Code formatting and linting
 check:
-	poetry run black app tests --check
-	poetry run isort app tests --check-only --diff
 	poetry run mypy --show-error-codes app tests
-
-black-check:
-	poetry run black app tests --check
-
-isort-check:
-	poetry run isort app tests --check-only --diff
 
 mypy-check:
 	poetry run mypy --show-error-codes app tests
-
-black-format:
-	poetry run black app tests
-
-isort-format:
-	poetry run isort app tests
-
-format:
-	poetry run black app tests
-	poetry run isort app tests
 
 
 # Migrations

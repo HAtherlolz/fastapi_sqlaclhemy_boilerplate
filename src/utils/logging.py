@@ -1,15 +1,16 @@
 # app/utils/logging.py
 from __future__ import annotations
 
+from contextvars import ContextVar, Token
 import logging
 import logging.config
 import os
-from contextvars import ContextVar, Token
 from typing import Any, Sequence
 
 import uvicorn.logging
 
-from app.config.config import settings
+from src.config.config import settings
+
 
 # -------- trace id context --------
 trace_id_var: ContextVar[str] = ContextVar("trace_id", default="undefined")
@@ -42,20 +43,14 @@ class LoggingConfig:
     DEFAULT_LOG_FORMAT: str = (
         "[%(trace_id)s] - [%(levelname)s] - %(message)s"
         if os.environ.get("LOG_MODE") == "dev"
-        else '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "body": "%(message)s", "log.logger": "%(name)s", "metadata": {"process": "%(process)d", "path": "%(pathname)s", "trace_id": "%(trace_id)s"}}'
+        else '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "body": "%(message)s", '
+             '"log.logger": "%(name)s", "metadata": {"process": "%(process)d", "path": "%(pathname)s", '
+             '"trace_id": "%(trace_id)s"}}'
     )
     DEFAULT_LOG_LEVEL: str = "INFO"
 
-    LOG_FORMAT: str = (
-        getattr(settings, "LOG_FORMAT", None)
-        or os.environ.get("LOG_FORMAT")
-        or DEFAULT_LOG_FORMAT
-    )
-    LOG_LEVEL: str = (
-        getattr(settings, "LOG_LEVEL", None)
-        or os.environ.get("LOG_LEVEL")
-        or DEFAULT_LOG_LEVEL
-    )
+    LOG_FORMAT: str = getattr(settings, "LOG_FORMAT", None) or os.environ.get("LOG_FORMAT") or DEFAULT_LOG_FORMAT
+    LOG_LEVEL: str = getattr(settings, "LOG_LEVEL", None) or os.environ.get("LOG_LEVEL") or DEFAULT_LOG_LEVEL
     LOG_MULTILINE_MODE_ENABLED: bool = os.environ.get("LOG_MODE") == "dev"
 
     LOGGING_CONFIG: dict[str, Any] = {
@@ -67,11 +62,7 @@ class LoggingConfig:
                 "fmt": LOG_FORMAT,
             },
             "single_line": {
-                "()": (
-                    SingleLineFormatter
-                    if not LOG_MULTILINE_MODE_ENABLED
-                    else "logging.Formatter"
-                ),
+                "()": (SingleLineFormatter if not LOG_MULTILINE_MODE_ENABLED else "logging.Formatter"),
                 "fmt": LOG_FORMAT,
             },
         },
