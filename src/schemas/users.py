@@ -1,8 +1,9 @@
 """
 The schemas for users request, request
 """
-import re
+
 from datetime import datetime
+import re
 
 from pydantic import BaseModel, field_validator
 
@@ -11,6 +12,7 @@ class UserCreateRequestSchema(BaseModel):
     """
     Request schema for user creation.
     """
+
     email: str
     password: str
     full_name: str
@@ -22,9 +24,7 @@ class UserCreateRequestSchema(BaseModel):
 
         # exactly two words, only letters
         if not re.fullmatch(r"[A-Za-z]+(?:\s+[A-Za-z]+)", value):
-            raise ValueError(
-                "full_name must consist of exactly two words containing only letters"
-            )
+            raise ValueError("full_name must consist of exactly two words containing only letters")
 
         return value
 
@@ -33,6 +33,7 @@ class UserDetailSchema(BaseModel):
     """
     User detail schema for retrieving.
     """
+
     email: str
     first_name: str
     last_name: str

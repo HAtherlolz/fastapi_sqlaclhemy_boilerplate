@@ -4,9 +4,10 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from src.config.config import DatabaseSettings
-from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, async_sessionmaker, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from src.config.config import DatabaseSettings
 
 
 class Database:

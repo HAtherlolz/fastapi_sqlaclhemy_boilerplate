@@ -1,4 +1,5 @@
 from typing import AsyncIterator
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import Database

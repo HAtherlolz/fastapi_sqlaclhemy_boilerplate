@@ -1,7 +1,7 @@
 # app/models/user.py
 from __future__ import annotations
 
-from sqlalchemy import Boolean, DateTime, String, func, text
+from sqlalchemy import Boolean, String, text
 from sqlmodel import Field
 
 from src.models.base import BaseSQLModel
@@ -11,6 +11,7 @@ class User(BaseSQLModel, table=True):
     """
     Users model.
     """
+
     __tablename__ = "users"
 
     email: str = Field(

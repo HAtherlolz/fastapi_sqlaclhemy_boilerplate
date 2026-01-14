@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import ClassVar
 
 from sqlalchemy import DateTime, func
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 
 class BaseSQLModel(SQLModel):
