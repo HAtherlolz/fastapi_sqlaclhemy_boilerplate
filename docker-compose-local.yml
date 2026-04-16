@@ -1,0 +1,52 @@
+services:
+  # --- PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Migrations ---
+  migrations:
+    build: .
+    env_file: .env
+    environment:
+      SERVICE: migrations
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # --- FastAPI App ---
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SERVICE: api
+      DB_HOST: postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  certbot_www:
+  certbot_conf:
+

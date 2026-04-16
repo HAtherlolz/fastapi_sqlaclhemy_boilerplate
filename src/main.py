@@ -11,6 +11,7 @@ from src.endpoints.routers import api_router
 
 # Init of the httpx client for the whole app.
 from src.utils.logging import LoggingConfig, logger
+from src.endpoints.exception_handlers import register_exception_handlers
 
 
 @asynccontextmanager
@@ -46,6 +47,9 @@ def create_api() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Register exception handlers
+    register_exception_handlers(app)
 
     # Routers
     app.include_router(api_router)

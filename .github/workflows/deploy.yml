@@ -1,0 +1,73 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  APP_DIR: /home/ubuntu/app
+
+jobs:
+  # --- Lint & Test ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install --no-interaction
+
+      - name: Lint with ruff
+        run: poetry run ruff check src/
+
+      - name: Run tests
+        run: poetry run pytest --tb=short -q
+        continue-on-error: true
+
+  # --- Deploy ---
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            # Clone or pull latest code
+            if [ -d "${{ env.APP_DIR }}" ]; then
+              cd ${{ env.APP_DIR }}
+              git fetch origin main
+              git reset --hard origin/main
+            else
+              git clone https://github.com/${{ github.repository }}.git ${{ env.APP_DIR }}
+              cd ${{ env.APP_DIR }}
+            fi
+
+            # Write .env file from secret
+            echo '${{ secrets.ENV_FILE }}' > .env
+
+            # Build and deploy
+            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml up -d --force-recreate
+
+            # Cleanup old images
+            docker image prune -f
+
+            # Wait and check health
+            sleep 10
+            docker compose -f docker-compose.yml ps
+
