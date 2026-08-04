@@ -1,8 +1,9 @@
 name: Deploy to AWS EC2
 
+# Manual-only: Hetzner (.github/workflows/deploy-hetzner.yml) is the workflow
+# wired to `push` on main. Keep this one for the AWS/EC2 path (terraform/) and
+# trigger it from the Actions tab when needed.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 env:
@@ -22,14 +23,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install poetry
-          poetry install --no-interaction
+          poetry install --with dev --no-interaction
 
       - name: Lint with ruff
         run: poetry run ruff check src/
 
       - name: Run tests
-        run: poetry run pytest --tb=short -q
-        continue-on-error: true
+        run: |
+          if [ -d tests ] || [ -d src/tests ]; then
+            poetry run pytest --tb=short -q
+          else
+            echo "No tests directory found — skipping pytest"
+          fi
 
   # --- Deploy ---
   deploy:
@@ -70,4 +75,3 @@ jobs:
             # Wait and check health
             sleep 10
             docker compose -f docker-compose.yml ps
-

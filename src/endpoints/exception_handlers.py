@@ -1,10 +1,10 @@
-from fastapi import Request, Response, status, FastAPI
+from fastapi import FastAPI, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel, ValidationError
 
 from src.exceptions.base_exceptions import BaseAppException
-from src.utils.logging import logger
+from src.utils.logging import get_trace_id, logger
 
 
 class ErrorResponseSchema(BaseModel):
@@ -16,7 +16,7 @@ class ErrorResponseSchema(BaseModel):
 def _build_error_response(request: Request, status_code: int, message: str, error_type: str) -> ORJSONResponse:
     response_schema = ErrorResponseSchema(
         message=message,
-        trace_id=request.state.trace_id,
+        trace_id=getattr(request.state, "trace_id", None) or get_trace_id(),
         error_type=error_type,
     )
     return ORJSONResponse(status_code=status_code, content=response_schema.model_dump())
@@ -28,7 +28,7 @@ async def base_app_exception_handler(request: Request, exc: BaseAppException) ->
         request=request,
         status_code=exc.status_code,
         message=exc.message,
-        error_type=exc.__class__.name,
+        error_type=exc.__class__.__name__,
     )
 
 
@@ -45,7 +45,7 @@ async def pydantic_validation_exception_handler(request: Request, exc: Exception
         request=request,
         status_code=status.HTTP_400_BAD_REQUEST,
         message=message,
-        error_type=exc.__class__.name,
+        error_type=exc.__class__.__name__,
     )
 
 
@@ -55,7 +55,7 @@ async def unexpected_exception_handler(request: Request, exc: Exception) -> Resp
         request=request,
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         message="Unexpected error occurred.",
-        error_type=exc.__class__.name,
+        error_type=exc.__class__.__name__,
     )
 
 

@@ -4,4 +4,3 @@ key_name         = "my-aws-key"
 project_name     = "fastapi-boilerplate"
 allowed_ssh_cidr = "0.0.0.0/0"   # Замените на ваш IP: "1.2.3.4/32"
 root_volume_size = 20
-

@@ -2,6 +2,11 @@
 
 Инструкция по настройке автоматического деплоя через GitHub Actions.
 
+> ℹ️ **Это альтернативный (AWS) путь.** Основной деплой проекта — Hetzner Cloud:
+> см. [hetzner-setup.md](hetzner-setup.md) и `.github/workflows/deploy-hetzner.yml`.
+> Workflow `.github/workflows/deploy.yml` (AWS) переведён в режим **только вручную**
+> (`workflow_dispatch`), чтобы два пайплайна не деплоили одновременно на push в `main`.
+
 ---
 
 ## Как это работает
@@ -98,4 +103,3 @@ Workflow поддерживает `workflow_dispatch` — можно запус�
 - SSH-ключ в секрете должен быть **полным** (включая `-----BEGIN/END-----`)
 - Порт 22 в Security Group должен быть открыт для IP GitHub Actions (или `0.0.0.0/0`)
 - При первом деплое убедитесь что Docker установлен (Terraform user_data делает это автоматически)
-

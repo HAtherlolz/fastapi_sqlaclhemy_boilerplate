@@ -1,0 +1,10 @@
+hcloud_token    = "HETZNER_TOKEN_PLACEHOLDER"
+ssh_public_key  = "ssh-ed25519 AAAA... your_public_key"
+ssh_key_name    = "autopro-deploy-key"
+server_name     = "autopro"
+server_type     = "cpx22" # 2 vCPU, 4GB (AMD, x86)
+image           = "ubuntu-24.04"
+location        = "nbg1" # cpx22 доступен в nbg1 / hel1 / sin
+user            = "deploy"
+create_firewall = true
+allowed_ports   = [22, 80, 443]

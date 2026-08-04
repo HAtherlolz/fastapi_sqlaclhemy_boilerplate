@@ -1,0 +1,138 @@
+name: CI / Deploy to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DEPLOY_USER: deploy
+  DEPLOY_PATH: /home/deploy/app
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        # The `dev` group is optional in pyproject.toml, so `--with dev`
+        # is required for ruff / pytest to be installed.
+        run: poetry install --with dev --no-interaction
+
+      - name: Lint with ruff
+        run: poetry run ruff check src/
+
+      - name: Check formatting with ruff
+        run: poetry run ruff format --check src/
+
+      - name: Run tests
+        run: |
+          if [ -d tests ] || [ -d src/tests ]; then
+            poetry run pytest --tb=short -q
+          else
+            echo "No tests directory found — skipping pytest"
+          fi
+
+  deploy:
+    name: Deploy to Hetzner
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install rsync and ssh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync openssh-client
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          cat > ~/.ssh/id_ed25519 << 'EOF'
+          ${{ secrets.SSH_PRIVATE_KEY }}
+          EOF
+
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.HETZNER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}" \
+            "echo 'SSH OK' && hostname"
+
+      - name: Ensure remote directory exists
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}" \
+            "mkdir -p ${{ env.DEPLOY_PATH }}"
+
+      - name: Upload project to server
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.idea' \
+            --exclude='.env' \
+            --exclude='infra' \
+            --exclude='terraform' \
+            --exclude='tutorials' \
+            --exclude='.venv' \
+            --exclude='venv' \
+            --exclude='__pycache__' \
+            --exclude='.pytest_cache' \
+            --exclude='.ruff_cache' \
+            --exclude='.mypy_cache' \
+            ./ \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}:${{ env.DEPLOY_PATH }}"
+
+      - name: Upload .env
+        run: |
+          cat > .env.ci << 'EOF'
+          ${{ secrets.ENV_FILE }}
+          EOF
+
+          scp -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            .env.ci \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}:${{ env.DEPLOY_PATH }}/.env"
+
+      - name: Show remote files
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}" \
+            "ls -la ${{ env.DEPLOY_PATH }} && test -f ${{ env.DEPLOY_PATH }}/.env && echo '.env exists'"
+
+      - name: Docker deploy
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}" \
+            "cd ${{ env.DEPLOY_PATH }} && docker compose up -d --build && docker compose restart nginx && docker image prune -f"
+
+      - name: Check containers
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            "${{ env.DEPLOY_USER }}@${{ secrets.HETZNER_HOST }}" \
+            "cd ${{ env.DEPLOY_PATH }} && docker compose ps"

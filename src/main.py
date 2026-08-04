@@ -7,11 +7,11 @@ import httpx
 import uvicorn
 
 from src.config.config import settings
+from src.endpoints.exception_handlers import register_exception_handlers
 from src.endpoints.routers import api_router
 
 # Init of the httpx client for the whole app.
 from src.utils.logging import LoggingConfig, logger
-from src.endpoints.exception_handlers import register_exception_handlers
 
 
 @asynccontextmanager

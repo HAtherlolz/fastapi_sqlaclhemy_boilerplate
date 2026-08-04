@@ -136,4 +136,3 @@ resource "aws_eip" "app_eip" {
     Project = var.project_name
   }
 }
-

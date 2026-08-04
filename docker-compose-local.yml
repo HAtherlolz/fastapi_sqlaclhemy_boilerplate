@@ -49,4 +49,3 @@ volumes:
   postgres_data:
   certbot_www:
   certbot_conf:
-
